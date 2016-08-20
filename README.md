@@ -1,4 +1,4 @@
-# java-utils
+# java-utils [![Build Status](https://snap-ci.com/rovats/java-utils/branch/master/build_image)](https://snap-ci.com/rovats/java-utils/branch/master)
 A collection of useful Java utilities
 
 ### Batch Collector
