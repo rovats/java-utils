@@ -2,7 +2,8 @@
 A collection of useful Java utilities
 
 ### Batch Collector
-A stream collector that allows batch processing of elements with a given `Consumer` (batch processor)
+A stream collector that allows batch processing of elements with a given `Consumer` (batch processor).
+
 Use the supplied utility class to get new instances:
 
 ```java
