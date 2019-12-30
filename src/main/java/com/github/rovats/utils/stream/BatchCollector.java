@@ -26,8 +26,26 @@ import static java.util.Objects.requireNonNull;
 class BatchCollector<T> implements Collector<T, List<T>, List<T>> {
 
     private final int batchSize;
+    private final boolean enforceStrictBatching;
     private final Consumer<List<T>> batchProcessor;
 
+    /**
+     * Constructs the batch collector
+     *
+     * @param batchSize
+     *            the batch size after which the batchProcessor should be called
+     * @param enforceStrictBatching
+     *           If true, the collector enforces processing in strict batches of
+     *           the specified size
+     *  @param batchProcessor
+     *            the batch processor which accepts batches of records to
+     *            process
+     */
+    BatchCollector(int batchSize, boolean enforceStrictBatching, Consumer<List<T>> batchProcessor) {
+        this.batchSize = batchSize;
+        this.enforceStrictBatching = enforceStrictBatching;
+        this.batchProcessor = requireNonNull(batchProcessor);
+    }
 
     /**
      * Constructs the batch collector
@@ -36,10 +54,7 @@ class BatchCollector<T> implements Collector<T, List<T>, List<T>> {
      * @param batchProcessor the batch processor which accepts batches of records to process
      */
     BatchCollector(int batchSize, Consumer<List<T>> batchProcessor) {
-        batchProcessor = requireNonNull(batchProcessor);
-
-        this.batchSize = batchSize;
-        this.batchProcessor = batchProcessor;
+        this(batchSize, false, batchProcessor);
     }
 
     public Supplier<List<T>> supplier() {
@@ -58,13 +73,38 @@ class BatchCollector<T> implements Collector<T, List<T>, List<T>> {
 
     public BinaryOperator<List<T>> combiner() {
         return (ts, ots) -> {
-            // process each parallel list without checking for batch size
-            // avoids adding all elements of one to another
-            // can be modified if a strict batching mode is required
-            batchProcessor.accept(ts);
-            batchProcessor.accept(ots);
-            return Collections.emptyList();
+            if (enforceStrictBatching) {
+                // implement strict batching mode is required
+                List<T> combinedTarget = ts;
+                int numOther = ots.size();
+                for (int iIdx = 0; iIdx < numOther; iIdx++) {
+                    combinedTarget = processCompletedBatch(combinedTarget);
+                    combinedTarget.add(ots.get(iIdx));
+                }
+                return processCompletedBatch(combinedTarget);
+            }
+            else {
+                // process each parallel list without checking for batch size
+                // avoids adding all elements of one to another
+                batchProcessor.accept(ts);
+                batchProcessor.accept(ots);
+                return Collections.emptyList();
+            }
         };
+    }
+
+    /**
+     * if the list has reached the 'batchSize', invoke the batchProcessor
+     * 
+     * @param combinedTarget
+     * @return
+     */
+    protected List<T> processCompletedBatch(List<T> combinedTarget) {
+        if (combinedTarget.size() == batchSize) {
+            batchProcessor.accept(combinedTarget);
+            return new ArrayList<>();
+        }
+        return combinedTarget;
     }
 
     public Function<List<T>, List<T>> finisher() {
