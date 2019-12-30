@@ -59,7 +59,7 @@ public class BatchCollectorTest {
     }
 
     @Test
-    public void testBatchCollectorParallelStrictBatchSize() {
+    public void parallelStrictBatchSizeBatchCollector() {
         List<String> dataSet = Arrays.asList("S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10");
         
         int dataSize = dataSet.size();
