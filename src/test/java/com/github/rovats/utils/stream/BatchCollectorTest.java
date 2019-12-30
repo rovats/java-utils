@@ -1,13 +1,15 @@
 package com.github.rovats.utils.stream;
 
-import org.junit.Test;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static org.junit.Assert.assertArrayEquals;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class BatchCollectorTest {
 
@@ -56,5 +58,26 @@ public class BatchCollectorTest {
         assertArrayEquals(input.toArray(), output.toArray());
     }
 
+    @Test
+    public void testBatchCollectorParallelStrictBatchSize() {
+        List<String> dataSet = Arrays.asList("S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10");
+        
+        int dataSize = dataSet.size();
+        int batchSize = 3;
+        List<String> finalList = dataSet
+                                    .stream()
+                                    .parallel()
+                                    .map(e -> e)
+                                    .collect(
+                                         StreamUtils.batchCollector(
+                                                             batchSize,
+                                                             true, // enforce strict batching
+                                                             e -> assertTrue(e.size() == batchSize || e.size() == dataSize % batchSize)
+                                                             )
+                                         );
+        Assert.assertTrue(finalList.size() == 0);
+
+        
+    }
 
 }
