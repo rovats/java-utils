@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 public class BatchCollectorTest {
 
@@ -56,5 +57,16 @@ public class BatchCollectorTest {
         assertArrayEquals(input.toArray(), output.toArray());
     }
 
+    @Test
+    public void numRecordsProcessed() {
+        List<Integer> input = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        List<Integer> output = new ArrayList<>();
 
+        BatchCollector<Integer> batchCollector = StreamUtils.batchCollector(3, xs -> output.addAll(xs));
+
+        input.stream()
+                .collect(batchCollector);
+
+        assertEquals(10, batchCollector.getNumRecordsProcessed());
+    }
 }
