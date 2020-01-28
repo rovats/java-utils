@@ -27,6 +27,7 @@ class BatchCollector<T> implements Collector<T, List<T>, List<T>> {
 
     private final int batchSize;
     private final Consumer<List<T>> batchProcessor;
+    private long recordsProcessed = 0;
 
 
     /**
@@ -51,6 +52,7 @@ class BatchCollector<T> implements Collector<T, List<T>, List<T>> {
             ts.add(t);
             if (ts.size() >= batchSize) {
                 batchProcessor.accept(ts);
+                recordsProcessed += ts.size();
                 ts.clear();
             }
         };
@@ -63,6 +65,7 @@ class BatchCollector<T> implements Collector<T, List<T>, List<T>> {
             // can be modified if a strict batching mode is required
             batchProcessor.accept(ts);
             batchProcessor.accept(ots);
+            recordsProcessed += (ts.size() + ots.size());
             return Collections.emptyList();
         };
     }
@@ -70,11 +73,16 @@ class BatchCollector<T> implements Collector<T, List<T>, List<T>> {
     public Function<List<T>, List<T>> finisher() {
         return ts -> {
             batchProcessor.accept(ts);
+            recordsProcessed += ts.size();
             return Collections.emptyList();
         };
     }
 
     public Set<Characteristics> characteristics() {
         return Collections.emptySet();
+    }
+
+    public long getNumRecordsProcessed() {
+        return recordsProcessed;
     }
 }
