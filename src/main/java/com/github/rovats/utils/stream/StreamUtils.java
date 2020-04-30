@@ -20,7 +20,6 @@ package com.github.rovats.utils.stream;
 
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collector;
 
 public class StreamUtils {
 

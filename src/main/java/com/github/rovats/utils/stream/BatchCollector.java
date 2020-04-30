@@ -89,7 +89,10 @@ class BatchCollector<T> implements Collector<T, List<T>, List<T>> {
 
     public Function<List<T>, List<T>> finisher() {
         return ts -> {
-            batchProcessor.accept(ts);
+            if (!ts.isEmpty()) {
+                batchProcessor.accept(ts);
+                recordsProcessed += ts.size();
+            }
             return Collections.emptyList();
         };
     }
