@@ -5,3 +5,8 @@ dist
 *.ipr
 *.iws
 *.ids
+
+.DS_Store
+.project
+.classpath
+org.eclipse.*.prefs
