@@ -18,7 +18,7 @@ input.stream()
 ```
 To fetch the number of records processed by the batch collector:
 
-```
+```java
 List<Integer> input = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 List<Integer> output = new ArrayList<>();
 
